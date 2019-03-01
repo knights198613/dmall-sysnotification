@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <property name="stdout-pattern" value="[%p] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t][%c] - %m %n"/>
+    <property name="max-history" value="30"/>
+    <property name="max-file-size" value="100MB"/>
+    <property name="encoding" value="UTF-8"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${stdout-pattern}</pattern>
+        </encoder>
+    </appender>
+
+
+    <root level="debug">
+        <appender-ref ref="console"></appender-ref>
+    </root>
+</configuration>
