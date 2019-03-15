@@ -45,7 +45,7 @@ public class ZkFactory {
     /**
      * 引用名称 （路径前缀）
      */
-    private String appName;
+    private static String appName;
 
 
 
@@ -101,7 +101,7 @@ public class ZkFactory {
         this.zkClient = zkClient;
     }
 
-    public String getAppName() {
+    public static String getAppName() {
         if(appName !=null && appName.trim().length() > 0) {
             return appName;
         }

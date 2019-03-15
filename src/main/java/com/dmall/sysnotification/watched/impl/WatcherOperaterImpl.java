@@ -8,6 +8,7 @@ import com.dmall.sysnotification.watched.WatcherOperater;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.CreateMode;
 
@@ -21,10 +22,10 @@ import java.util.List;
  */
 
 public class WatcherOperaterImpl implements WatcherOperater {
-    private ZkFactory zkFactory;
+    private ZkClient zkClient;
 
-    public WatcherOperaterImpl(ZkFactory zkFactory) {
-        this.zkFactory = zkFactory;
+    public WatcherOperaterImpl(ZkClient zkClient) {
+        this.zkClient = zkClient;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class WatcherOperaterImpl implements WatcherOperater {
         if(StringUtils.isBlank(path)) {
             throw new PathillegalException(ExceptionMsgEnums.PATH_NULL_EXC);
         }else {
-            String tmpPath = PathUtils.appendPaths(new String[]{zkFactory.getAppName()});
+            String tmpPath = PathUtils.appendPaths(new String[]{ZkFactory.getAppName()});
             if (!createMode.isEphemeral()) {
                 if (PathUtils.hasSubPath(path)) {
                     String[] subPaths = StringUtils.split(path, File.separator);
@@ -57,18 +58,18 @@ public class WatcherOperaterImpl implements WatcherOperater {
                     createZnode(tmpPath, nodeData, createMode);
                 }
             }
-            zkFactory.getZkClient().subscribeDataChanges(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), path}), zkDataListener);
+            zkClient.subscribeDataChanges(PathUtils.appendPaths(new String[]{ZkFactory.getAppName(), path}), zkDataListener);
         }
     }
 
     @Override
     public void addStateChangeWatcher(IZkStateListener zkStateListener) {
-        zkFactory.getZkClient().subscribeStateChanges(zkStateListener);
+        zkClient.subscribeStateChanges(zkStateListener);
     }
 
     @Override
     public List<String> addChildrenChangeWatcher(IZkChildListener zkChildListener, String path) {
-        return zkFactory.getZkClient().subscribeChildChanges(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), path}), zkChildListener);
+        return zkClient.subscribeChildChanges(PathUtils.appendPaths(new String[]{ZkFactory.getAppName(), path}), zkChildListener);
     }
 
     /**
@@ -77,7 +78,7 @@ public class WatcherOperaterImpl implements WatcherOperater {
      * @return
      */
     private boolean hasNode(String nodePath) {
-        return zkFactory.getZkClient().exists(nodePath);
+        return zkClient.exists(nodePath);
     }
 
     /**
@@ -87,7 +88,7 @@ public class WatcherOperaterImpl implements WatcherOperater {
      * @param createMode
      */
     private void createZnode(String nodePath, Object nodeData, CreateMode createMode) {
-        zkFactory.getZkClient().create(nodePath, nodeData, createMode);
+        zkClient.create(nodePath, nodeData, createMode);
     }
 
 }

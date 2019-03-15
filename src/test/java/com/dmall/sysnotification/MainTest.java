@@ -2,6 +2,7 @@ package com.dmall.sysnotification;
 
 import com.dmall.sysnotification.factory.ZkFactory;
 import com.dmall.sysnotification.listener.ZkDataChangeListener;
+import com.dmall.sysnotification.listener.ZkStateChangeListener;
 import com.dmall.sysnotification.utils.PathUtils;
 import com.dmall.sysnotification.watched.WatcherOperater;
 import com.dmall.sysnotification.watched.impl.WatcherOperaterImpl;
@@ -26,15 +27,29 @@ public class MainTest {
 
     @Test
     public void test() {
-        String znodePath = "/test0001";
-        WatcherOperater watcherOperater = new WatcherOperaterImpl(zkFactory);
-        ZkDataChangeListener dataChangeListener = new ZkDataChangeListener();
+        String znodePath1 = "/test0001";
+        String znodePath2 = "/test0002";
+        WatcherOperater watcherOperater = new WatcherOperaterImpl(zkFactory.getZkClient());
+        ZkDataChangeListener dataChangeListener1 = new ZkDataChangeListener();
+        ZkDataChangeListener dataChangeListener2 = new ZkDataChangeListener();
 
-        watcherOperater.addDataChangeWatcher(dataChangeListener, znodePath, "13333", CreateMode.EPHEMERAL);
+        watcherOperater.addStateChangeWatcher(new ZkStateChangeListener());
+        watcherOperater.addDataChangeWatcher(dataChangeListener1, znodePath1, "13333", CreateMode.EPHEMERAL);
+        watcherOperater.addDataChangeWatcher(dataChangeListener2, znodePath2, "14444", CreateMode.EPHEMERAL);
 
-        String result = zkFactory.getZkClient().readData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath}));
-        System.out.println("节点设置之前的值为："+result);
-        zkFactory.getZkClient().writeData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath}), "13333");
+
+        String result1 = zkFactory.getZkClient().readData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath1}));
+        String result2 = zkFactory.getZkClient().readData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath2}));
+        System.out.println("节点设置之前的值为："+result1);
+        System.out.println("节点设置之前的值为："+result2);
+
+        try {
+            Thread.sleep(50*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        zkFactory.getZkClient().writeData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath2}), "14444");
+        zkFactory.getZkClient().writeData(PathUtils.appendPaths(new String[]{zkFactory.getAppName(), znodePath1}), "13333");
 
         try {
             Thread.sleep(3*1000);
@@ -43,6 +58,13 @@ public class MainTest {
         }
 
         zkFactory.getZkClient().close();
+
+        try {
+            Thread.sleep(10*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
     }
 }
